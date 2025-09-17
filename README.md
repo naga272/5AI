@@ -2,7 +2,7 @@
 
 ## ⚠️ Warning ⚠️
 
-Per nessuna ragione deve venir toccato questo branch, ognuno lavora al proprio.
+Per nessuna ragione deve venir toccato il branch main, ognuno si crea il suo.
 
 Se non hai ben presente come si fa ti spiego in questo tutorial
 
