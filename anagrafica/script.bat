@@ -1,5 +1,4 @@
 @echo on
 
 pip install -r requirements.txt
-python main.py listacomuni.txt myfile.sql
-exit
+python main.py listacomuni.csv myfile.sql
