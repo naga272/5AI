@@ -71,18 +71,26 @@ int filosofo_core(int semid, int posata)
     if (semid < 0)
         return EXIT_FAILURE;
 
+    int posatas = posata;
+    int posatad = posata + 1 % 5;
+
     // il filosofo prende le due forchette adiacenti a lui
-    sem_op(semid, posata, -1);
-    sem_op(semid, (posata + 1) % 5, -1); // % 5 per sicurezza in caso di seg fault
+    sem_op(semid, posatas, -1);
+    printf("Filosofo %d ha preso la forchetta %d\n", posata, posatas);
+
+    sleep(1);
+    // seconda forchetta
+    sem_op(semid, posatad, -1);
 
     // sta mangiando ...
     printf("sto mangiando\n");
-    sleep(1);
+    sleep(2);
+    printf("ho finito di mangiare\n");
 
     // il filosofo ha finito e posa le forchette
-    sem_op(semid, posata, +1);
-    sem_op(semid, (posata + 1) % 5, +1); // % 5 per sicurezza in caso di seg fault
-
+    sem_op(semid, posatas, 1);
+    sem_op(semid, posatad, 1);
+    printf("filosofo ha rilasciato le forchette\n");
     return EXIT_SUCCESS;
 }
 
@@ -100,7 +108,7 @@ int main(int argc, char **argv, char **envp)
         "errore durante la creazione del semaforo"
     )
 
-    // setto le forchette come usabili
+    // Inizializza le forchette come disponibili (valore 1)
     for (int i = 0; i < 5; i++)
         sem_op(semid, i, 1);
 
