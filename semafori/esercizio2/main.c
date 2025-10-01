@@ -10,35 +10,7 @@
 * Dopo aver mangiato, il filosofo rimette le forchette al loro posto e continua a pensare.
 */
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdint.h>
-
-#if __unix__
-#include <unistd.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/wait.h>
-#else
-#error "puoi compilare questo codice solo con os unix-like"
-#endif
-
-#ifndef CHECKER
-#define CHECKER(x, msg)                                             \
-    if (x) {                                                        \
-        printf("errore: %s\n%i: %s", msg, errno, strerror(errno));  \
-        exit(errno);                                                \
-    }
-#else
-#error "macro CHECKER gia definita altrove, rinominala in un atrlo modo"
-#endif
-
-
-#define KEY 1234
-
+#include "config.h"
 
 /*
  * Creo una sola istanza alla struct sembuf,
@@ -56,7 +28,7 @@ void sem_op(int semfd, int semnum, int op)
 
     CHECKER(
         semop(semfd, &bf, 1) == -1,
-        "Errore durante la semop"
+        "<1>Errore durante la semop"
     )
 }
 
@@ -76,21 +48,21 @@ int filosofo_core(int semid, int posata)
 
     // il filosofo prende le due forchette adiacenti a lui
     sem_op(semid, posatas, -1);
-    printf("Filosofo %d ha preso la forchetta %d\n", posata, posatas);
+    printd("<3>Filosofo ha preso la forchetta\n");
 
     sleep(1);
     // seconda forchetta
     sem_op(semid, posatad, -1);
 
     // sta mangiando ...
-    printf("sto mangiando\n");
+    printd("<3>sto mangiando\n");
     sleep(2);
-    printf("ho finito di mangiare\n");
+    printd("<3>ho finito di mangiare\n");
 
     // il filosofo ha finito e posa le forchette
     sem_op(semid, posatas, 1);
     sem_op(semid, posatad, 1);
-    printf("filosofo ha rilasciato le forchette\n");
+    printd("<3>filosofo ha rilasciato le forchette\n");
     return EXIT_SUCCESS;
 }
 
@@ -105,7 +77,7 @@ int main(int argc, char **argv, char **envp)
     int semid = semget(KEY, 5, IPC_CREAT | 0666);
     CHECKER(
         semid == -1, 
-        "errore durante la creazione del semaforo"
+        "<1>errore durante la creazione del semaforo"
     )
 
     // Inizializza le forchette come disponibili (valore 1)
@@ -115,7 +87,7 @@ int main(int argc, char **argv, char **envp)
     // creo 5 figli (i filosofi)
     for (int i = 0; i < filosofi; i++) {
         pid = fork();
-        CHECKER(pid == -1, "errore durante la fork")
+        CHECKER(pid == -1, "<1>errore durante la fork")
 
         // processo padre ha il pid del figlio, il figlio ha valore 0
         if (pid)
