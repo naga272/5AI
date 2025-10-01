@@ -15,11 +15,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <stdint.h>
 
+#if __unix__
 #include <unistd.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/wait.h>
+#else
+#error "puoi compilare questo codice solo con os unix-like"
+#endif
 
 #ifndef CHECKER
 #define CHECKER(x, msg)                                             \
@@ -56,6 +61,32 @@ void sem_op(int semfd, int semnum, int op)
 }
 
 
+int filosofo_core(int semid, int posata)
+{
+    /*
+    * Ogni filosofo esegue questa funzione:
+    * @semid: fd che punta all'array di semafori
+    * @posata: indica la posata che si trova davanti a lu
+    */
+    if (semid < 0)
+        return EXIT_FAILURE;
+
+    // il filosofo prende le due forchette adiacenti a lui
+    sem_op(semid, posata, -1);
+    sem_op(semid, (posata + 1) % 5, -1); // % 5 per sicurezza in caso di seg fault
+
+    // sta mangiando ...
+    printf("sto mangiando\n");
+    sleep(1);
+
+    // il filosofo ha finito e posa le forchette
+    sem_op(semid, posata, +1);
+    sem_op(semid, (posata + 1) % 5, +1); // % 5 per sicurezza in caso di seg fault
+
+    return EXIT_SUCCESS;
+}
+
+
 int main(int argc, char **argv, char **envp)
 {
     int filosofi = 5;
@@ -82,22 +113,9 @@ int main(int argc, char **argv, char **envp)
         if (pid)
             continue;
 
-        if (!pid) {
-            // processo figlio = filosofo
-            // il filosofo prende le due forchette adiacenti a lui
-            sem_op(semid, i, -1);
-            sem_op(semid, (i + 1) % 5, -1); // % 5 per sicurezza in caso di seg fault
-
-            // sta mangiando ...
-            printf("sto mangiando\n");
-            sleep(1);
-
-            // il filosofo ha finito e posa le forchette
-            sem_op(semid, i, +1);
-            sem_op(semid, (i + 1) % 5, +1); // % 5 per sicurezza in caso di seg fault
-            // il filosofo deve saltare il ciclo
-            break;
-        }
+        // processo figlio = filosofo
+        if (!pid) 
+            return filosofo_core(semid, i);
     }
 
     /* 
@@ -107,9 +125,5 @@ int main(int argc, char **argv, char **envp)
      * questa restituisce il valore -1.
     */
     while (pid && wait(NULL) != -1);
-
-    // printf("hello world\n");
     return EXIT_SUCCESS;
 }
-
-
