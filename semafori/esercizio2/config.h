@@ -28,12 +28,36 @@
 #endif
 
 #ifndef KEY
-#define KEY 1234
+#define KEY 9876
 #else 
 #error "macro KEY gia definita da qualche altra parte"
 #endif
 
-// printf("\033[31mQuesto è rosso\033[0m\n");
+#ifndef MAX_N_TEST
+#define MAX_N_TEST 10
+#endif
+
+#ifndef N_SEMA
+#define N_SEMA 5
+#endif
+
+#ifndef N_FILOSOFI
+#define N_FILOSOFI 5
+#endif
+
+#ifndef TEMPO_X_PENSARE
+#define TEMPO_X_PENSARE 2
+#endif
+
+#ifndef TEMPO_X_SEC_FORK
+#define TEMPO_X_SEC_FORK 1
+#endif
+
+#ifndef TIME_EAT
+#define TIME_EAT 2
+#endif
+
+
 char* escapes[] = {
     "30",  // nero
     "31",  // rosso
@@ -92,9 +116,7 @@ void printd(char* msg)
     }
 
     int get_level = (int) (msg[1] - '0');
-
-    // salto "<n>"
-    msg += 2;
+    msg += 3;               // salto "<n>"
 
     if (get_level >= ilog_level)
         printf(
