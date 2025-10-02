@@ -27,7 +27,7 @@ void sem_op(int semfd, int semnum, int op)
     struct sembuf bf;
     bf.sem_num = semnum;
     bf.sem_op = op;
-    bf.sem_flg = 0;
+    bf.sem_flg = SEM_UNDO;
 
     CHECKER(
         semop(semfd, &bf, 1) == -1,
