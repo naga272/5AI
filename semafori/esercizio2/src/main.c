@@ -58,7 +58,7 @@ int filosofo_core(int semid, int id)
     * @id: indica il numero del filosofo che si trova davanti al filosofo
     */
     if (semid < 0)
-        return EXIT_FAILURE;
+        return EINVAL;
 
     for (int count_test = 0; count_test < MAX_N_TEST; count_test++) {
         /* 
