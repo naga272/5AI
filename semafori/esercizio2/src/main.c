@@ -21,10 +21,16 @@
 
 #include "config.h"
 
+/*
+* Creo una sola struct sembuf bf per tutto il programma,
+* Cosi' ogni volta che viene chiamata sem_op 
+* non perdo tempo nel creare spazio nello stack.
+*/
+struct sembuf bf;
+
 
 void sem_op(int semfd, int semnum, int op)
 {
-    struct sembuf bf;
     bf.sem_num = semnum;
     bf.sem_op = op;
     bf.sem_flg = SEM_UNDO;
@@ -36,13 +42,14 @@ void sem_op(int semfd, int semnum, int op)
 }
 
 
-void pensando(int time)
+static inline void pensando(int time)
 {
+    printd("<2>filosofo sta pensando\n");
     sleep(time);
 }
 
 
-void mangia()
+static inline void mangia()
 {
     printd("<2>sta mangiando\n");
     sleep(TIME_EAT);
@@ -66,7 +73,6 @@ int filosofo_core(int semid, int id)
         * dorme ovvero fa le sue filosofeggiate
         */
         pensando(TEMPO_X_PENSARE);
-
         int psinistra = id;
         int pdestra = (id + 1) % N_FILOSOFI;
 
@@ -77,6 +83,7 @@ int filosofo_core(int semid, int id)
             * quanto tempo passa da quando prende una
             * forchetta a quando prende la seconda forchetta
             */
+            printd("<2>Filoso ha preso la prima forchetta\n");
             pensando(TEMPO_X_SEC_FORK);
             sem_op(semid, pdestra, -1);
         } else {
@@ -85,11 +92,12 @@ int filosofo_core(int semid, int id)
             * quanto tempo passa da quando prende una
             * forchetta a quando prende la seconda forchetta
             */
+            printd("<2>Filoso ha preso la prima forchetta\n");
             pensando(TEMPO_X_SEC_FORK);
             sem_op(semid, psinistra, -1);
         }
 
-        printd("<4>Filosofo ha preso le forchette\n");
+        printd("<4>Filosofo ha preso la seconda forchette\n");
 
         mangia();
 
@@ -135,7 +143,7 @@ int main(int argc, char **argv, char **envp)
             continue;
 
         // processo figlio = filosofo
-        if (!pid)
+        if (pid == 0)
             return filosofo_core(semid, i);
     }
 
