@@ -1,4 +1,5 @@
-#ifndef MAIN_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
 // https://gist.github.com/JBlond/2fea43a3049b38287e5e9cefc87b2124
 
