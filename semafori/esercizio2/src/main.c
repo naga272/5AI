@@ -37,23 +37,23 @@ void sem_op(int semfd, int semnum, int op)
 
     CHECKER(
         semop(semfd, &bf, 1) == -1,
-        "<1>Errore durante la semop"
+        "Errore durante la semop"
     )
 }
 
 
 static inline void pensando(int time)
 {
-    printd("<2>filosofo sta pensando\n");
-    sleep(time);
+    printd(DEBUG "filosofo sta pensando\n");
+    sleep(TEMPO_X_PENSARE);
 }
 
 
 static inline void mangia()
 {
-    printd("<2>sta mangiando\n");
+    printd(DEBUG "sta mangiando\n");
     sleep(TIME_EAT);
-    printd("<2>ha finito di mangiare\n");
+    printd(DEBUG "ha finito di mangiare\n");
 }
 
 
@@ -83,7 +83,7 @@ int filosofo_core(int semid, int id)
             * quanto tempo passa da quando prende una
             * forchetta a quando prende la seconda forchetta
             */
-            printd("<2>Filoso ha preso la prima forchetta\n");
+            printd(DINFO "Filoso ha preso la prima forchetta\n");
             pensando(TEMPO_X_SEC_FORK);
             sem_op(semid, pdestra, -1);
         } else {
@@ -92,19 +92,19 @@ int filosofo_core(int semid, int id)
             * quanto tempo passa da quando prende una
             * forchetta a quando prende la seconda forchetta
             */
-            printd("<2>Filoso ha preso la prima forchetta\n");
+            printd(DINFO "Filoso ha preso la prima forchetta\n");
             pensando(TEMPO_X_SEC_FORK);
             sem_op(semid, psinistra, -1);
         }
 
-        printd("<4>Filosofo ha preso la seconda forchette\n");
+        printd(DINFO "Filosofo ha preso la seconda forchette\n");
 
         mangia();
 
         // il filosofo ha finito e posa le forchette
         sem_op(semid, pdestra, +1);
         sem_op(semid, psinistra, +1);
-        printd("<4>filosofo ha rilasciato le forchette\n");    
+        printd(DWARN "filosofo ha rilasciato le forchette\n");    
     }
 
     return EXIT_SUCCESS;
@@ -119,14 +119,14 @@ int main(int argc, char **argv, char **envp)
     int semid = semget(KEY, N_SEMA, IPC_CREAT | 0666);
     CHECKER(
         semid == -1, 
-        "<1>errore durante la creazione del semaforo"
+        "Errore durante la creazione del semaforo"
     )
 
     // setto tutti i semafori a 1 (forchette disponibili)
     for (int i = 0; i < N_SEMA; i++) {
         CHECKER(
             semctl(semid, i, SETVAL, 1) == -1,
-            "<1>Errore durante semctl SETVAL"
+            "Errore durante semctl SETVAL"
         );
     }
     /*
@@ -136,7 +136,7 @@ int main(int argc, char **argv, char **envp)
     */
     for (int i = 0; i < N_FILOSOFI; i++) {
         pid = fork();
-        CHECKER(pid == -1, "<1>errore durante la fork")
+        CHECKER(pid == -1, "errore durante la fork")
 
         // processo padre ha il pid del figlio, il figlio ha valore 0
         if (pid)
@@ -153,6 +153,6 @@ int main(int argc, char **argv, char **envp)
      * Quando il processo padre non ha piu figli e chiamo la wait(),
      * questa restituisce il valore -1.
     */
-    while (pid && wait(NULL) != -1);
+    while (wait(NULL) != -1);
     return EXIT_SUCCESS;
 }

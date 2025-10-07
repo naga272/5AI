@@ -21,12 +21,19 @@
 #ifndef CHECKER
 #define CHECKER(x, msg)                                             \
     if (x) {                                                        \
-        printd("<1>" msg "\n");                                     \
+        printd(DERROR msg "\n");                                     \
         exit(errno);                                                \
     }
 #else
 #error "macro CHECKER gia definita altrove, rinominala in un atrlo modo"
 #endif
+
+#define DCRIT_ERROR "<0>"
+#define DERROR "<1>"
+#define DINFO "<2>"
+#define DWARN "<3>"
+#define DEBUG "<4>"
+
 
 #ifndef KEY
 #define KEY 9876
@@ -66,6 +73,7 @@ char* escapes[] = {
     "33",  // giallo
     "34",  // blu
 };
+
 
 
 // leggi printd(char* msg)
